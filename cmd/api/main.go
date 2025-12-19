@@ -2,30 +2,35 @@ package main
 
 import (
 	"log"
-	"os"
+	"path/filepath"
 
 	"bookstore-project/internal/database"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 )
 
-func execSQLFile(db *sqlx.DB, path string) error {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	_, err = db.Exec(string(data))
-	return err
-}
-
 func main() {
 	// Load environment variables from .env file
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found, using system environment variables: %v", err)
+	envPaths := []string{
+		".env",                      // Current directory
+		"../.env",                   // One level up
+		"../../.env",                // Two levels up (from cmd/api/)
+		filepath.Join("..", ".env"), // Alternative path format
 	}
 
-	// Connect to PostgreSQL using environment variables
+	var envLoaded bool
+	for _, envPath := range envPaths {
+		if err := godotenv.Load(envPath); err == nil {
+			envLoaded = true
+			break
+		}
+	}
+
+	if !envLoaded {
+		log.Printf("Warning: .env file not found in common locations, using system environment variables")
+	}
+
+	// cnnect to database and verify connection
 	db, err := database.New()
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
@@ -33,16 +38,4 @@ func main() {
 	defer db.Close()
 
 	log.Println("Connected to database successfully")
-
-	// Run DDL (creates tables) from migration file
-	if err := execSQLFile(db, "internal/database/migrations/001_create_tables.sql"); err != nil {
-		log.Fatalf("failed to run DDL migration: %v", err)
-	}
-	log.Println("Tables created/ensured successfully")
-
-	// Run seed data inserts
-	if err := execSQLFile(db, "internal/database/migrations/003_seed_data.sql"); err != nil {
-		log.Fatalf("failed to run seed data: %v", err)
-	}
-	log.Println("Seed data inserted successfully")
 }
