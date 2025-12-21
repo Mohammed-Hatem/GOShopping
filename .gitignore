@@ -1,0 +1,16 @@
+.idea/
+.vscode/
+
+.env
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+.DS_Store
+Thumbs.db

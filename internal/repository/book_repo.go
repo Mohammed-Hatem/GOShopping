@@ -36,7 +36,6 @@ func (B *BookRepo) GetBookByIsbn(isbn string) []models.Book {
 	return books
 }
 
-
 func (B *BookRepo) GetBookByTitle(Title string) []models.Book {
 	books := []models.Book{}
 
@@ -48,7 +47,6 @@ func (B *BookRepo) GetBookByTitle(Title string) []models.Book {
 
 	return books
 }
-
 
 func (B *BookRepo) GetBookByPubyear(PubYear int) []models.Book {
 	books := []models.Book{}
@@ -62,7 +60,6 @@ func (B *BookRepo) GetBookByPubyear(PubYear int) []models.Book {
 	return books
 }
 
-
 func (B *BookRepo) GetBookByCategory(category string) []models.Book {
 	books := []models.Book{}
 
@@ -75,6 +72,17 @@ func (B *BookRepo) GetBookByCategory(category string) []models.Book {
 	return books
 }
 
+func (B *BookRepo) GetBookByAuthor(author string) []models.Book {
+	books := []models.Book{}
+
+	err := B.db.Select(&books, "SELECT * FROM book WHERE author = $1", author)
+
+	if err != nil {
+		return []models.Book{}
+	}
+
+	return books
+}
 
 func (B *BookRepo) GetBooksToRestock() []models.Book {
 	books := []models.Book{}

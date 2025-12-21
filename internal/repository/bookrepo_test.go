@@ -201,6 +201,45 @@ func TestGetBookByCategory(t *testing.T) {
 	}
 }
 
+func TestGetBookByAuthor(t *testing.T) {
+	repo, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	allBooks := repo.GetAllBooks()
+	if len(allBooks) == 0 {
+		t.Skip("No books in database to test with")
+		return
+	}
+
+	// Test with a valid author name from seed data
+	testAuthor := "Robert C. Martin"
+	books := repo.GetBookByAuthor(testAuthor)
+
+	if books == nil {
+		t.Error("books should not be nil")
+	}
+
+	if len(books) == 0 {
+		t.Error("expected at least one book with the given author")
+	}
+
+	for _, book := range books {
+		fmt.Println(book)
+	}
+
+	// Test with a non-existent author
+	nonExistentAuthor := "Non-Existent Author Name 12345"
+	emptyBooks := repo.GetBookByAuthor(nonExistentAuthor)
+
+	if emptyBooks == nil {
+		t.Error("should return empty slice, not nil")
+	}
+
+	if len(emptyBooks) != 0 {
+		t.Errorf("expected empty slice for non-existent author, got %d books", len(emptyBooks))
+	}
+}
+
 func TestGetBooksToRestock(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
