@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS publisher (
     address      TEXT,
     phone        VARCHAR(20)
 );
-
 -- 2. author Table
 CREATE TABLE IF NOT EXISTS author (
     author_id SERIAL PRIMARY KEY,
@@ -31,8 +30,10 @@ CREATE TABLE IF NOT EXISTS book (
 -- 4. Book-Author Relationship Table
 CREATE TABLE IF NOT EXISTS book_author (
     isbn      VARCHAR(20),
+
     author_id INT,
     PRIMARY KEY (isbn, author_id),
+
     CONSTRAINT fk_book_author_book
         FOREIGN KEY (isbn) REFERENCES book(isbn),
     CONSTRAINT fk_book_author_author

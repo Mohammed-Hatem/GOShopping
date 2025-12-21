@@ -39,12 +39,12 @@ func New() (*sqlx.DB, error) {
 		sslmode = "disable"
 	}
 
-	dsn := fmt.Sprintf(
+	connection_string := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		host, port, user, password, dbname, sslmode,
 	)
 
-	db, err := sqlx.Connect("postgres", dsn)
+	db, err := sqlx.Connect("postgres", connection_string)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
