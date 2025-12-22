@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bookstore-project/internal/models"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,84 +15,87 @@ func NewBookRepo(db *sqlx.DB) *BookRepo {
 	return &BookRepo{db: db}
 }
 
-func (B *BookRepo) GetAllBooks() []models.Book {
+func (B *BookRepo) GetAllBooks() ([]models.Book, error) {
 	var books []models.Book
 	err := B.db.Select(&books, "SELECT * FROM book")
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }
 
-func (B *BookRepo) GetBookByIsbn(isbn string) []models.Book {
+func (r *BookRepo) GetBookByIsbn(isbn string) (*models.Book, error) {
+	var book models.Book
+	err := r.db.Get(&book, "SELECT * FROM book WHERE isbn = $1", isbn)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &book, nil
+}
+
+func (B *BookRepo) GetBookByTitle(title string) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, "SELECT * FROM book WHERE isbn = $1", isbn)
-
+	err := B.db.Select(&books, "SELECT * FROM book WHERE title = $1", title)
 	if err != nil {
-		return []models.Book{}
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }
 
-func (B *BookRepo) GetBookByTitle(Title string) []models.Book {
+func (B *BookRepo) GetBookByPubyear(pubYear int) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, "SELECT * FROM book WHERE title = $1", Title)
-
+	err := B.db.Select(&books, "SELECT * FROM book WHERE publication_year = $1", pubYear)
 	if err != nil {
-		return []models.Book{}
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }
 
-func (B *BookRepo) GetBookByPubyear(PubYear int) []models.Book {
-	books := []models.Book{}
-
-	err := B.db.Select(&books, "SELECT * FROM book WHERE publication_year = $1", PubYear)
-
-	if err != nil {
-		return []models.Book{}
-	}
-
-	return books
-}
-
-func (B *BookRepo) GetBookByCategory(category string) []models.Book {
+func (B *BookRepo) GetBookByCategory(category string) ([]models.Book, error) {
 	books := []models.Book{}
 
 	err := B.db.Select(&books, "SELECT * FROM book WHERE category = $1", category)
-
 	if err != nil {
-		return []models.Book{}
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }
 
-func (B *BookRepo) GetBookByAuthor(author string) []models.Book {
+func (B *BookRepo) GetBookByAuthor(author string) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, "SELECT * FROM book WHERE author = $1", author)
+	err := B.db.Select(&books, `
+		 SELECT DISTINCT b.*
+        FROM book b
+        JOIN book_author ba ON ba.isbn = b.isbn
+        JOIN author a ON a.author_id = ba.author_id
+        WHERE LOWER(a.name) = LOWER($1);
+    `, author)
 
 	if err != nil {
-		return []models.Book{}
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }
 
-func (B *BookRepo) GetBooksToRestock() []models.Book {
+func (B *BookRepo) GetBooksToRestock() ([]models.Book, error) {
 	books := []models.Book{}
 
 	err := B.db.Select(&books, "SELECT * FROM book WHERE stock_quantity <= threshold")
 
 	if err != nil {
-		return []models.Book{}
+		return nil, err
 	}
 
-	return books
+	return books, nil
 }

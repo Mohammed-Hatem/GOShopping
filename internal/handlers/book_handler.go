@@ -1,20 +1,62 @@
 package handlers
 
-
 import (
-	"net/http"
+	"bookstore-project/internal/repository"
+
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetBooks(w http.ResponseWriter, r *http.Request) {
+type BookHandler struct {
+	repo *repository.BookRepo
+}
 
-	app := fiber.New()
+func NewBookHandler(repo *repository.BookRepo) *BookHandler {
+	return &BookHandler{repo: repo}
+}
 
-	app.Get("/books", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+func (h *BookHandler) GetAllBooks(c *fiber.Ctx) error {
+	books, err := h.repo.GetAllBooks()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch books",
+		})
+	}
+	return c.JSON(books)
+}
 
-	app.Listen(":3000")
+func (h *BookHandler) GetBookByIsbn(c *fiber.Ctx) error {
+	book, err := h.repo.GetBookByIsbn(c.Params("isbn"))
 
-	defer app.Shutdown()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch book",
+		})
+	}
+
+	if book == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "book not found",
+		})
+	}
+
+	return c.JSON(book)
+}
+
+func (h *BookHandler) GetBookByAuthor(c *fiber.Ctx) error {
+	books, err := h.repo.GetBookByAuthor(c.Params("name"))
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch book",
+		})
+	}
+
+	if len(books) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "no books found",
+		})
+	}
+
+	return c.JSON(books)
+
 }

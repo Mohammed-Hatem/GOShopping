@@ -31,7 +31,10 @@ func TestGetAllBooks(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	books := repo.GetAllBooks()
+	books, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
@@ -51,39 +54,38 @@ func TestGetBookByIsbn(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	allBooks := repo.GetAllBooks()
+	allBooks, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(allBooks) == 0 {
 		t.Skip("No books in database to test with")
 		return
 	}
 
 	testIsbn := allBooks[0].Isbn
-	books := repo.GetBookByIsbn(testIsbn)
-
-	if books == nil {
-		t.Error("books should not be nil")
+	book, err := repo.GetBookByIsbn(testIsbn)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if len(books) == 0 {
-		t.Error("expected at least one book with the given ISBN")
+	if book == nil {
+		t.Fatal("expected a book, got nil")
 	}
 
-	for _, book := range books {
-		if book.Isbn != testIsbn {
-			t.Errorf("expected ISBN %s, got %s", testIsbn, book.Isbn)
-		}
-		fmt.Println(book)
+	if book.Isbn != testIsbn {
+		t.Errorf("expected ISBN %s, got %s", testIsbn, book.Isbn)
 	}
+	fmt.Println(*book)
 
 	nonExistentIsbn := "9999999999999"
-	emptyBooks := repo.GetBookByIsbn(nonExistentIsbn)
-
-	if emptyBooks == nil {
-		t.Error("should return empty slice, not nil")
+	emptyBook, err := repo.GetBookByIsbn(nonExistentIsbn)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if len(emptyBooks) != 0 {
-		t.Errorf("expected empty slice for non-existent ISBN, got %d books", len(emptyBooks))
+	if emptyBook != nil {
+		t.Errorf("expected nil for non-existent ISBN, got %+v", emptyBook)
 	}
 }
 
@@ -92,14 +94,20 @@ func TestGetBookByTitle(t *testing.T) {
 	defer cleanup()
 
 	// Test with a valid title
-	allBooks := repo.GetAllBooks()
+	allBooks, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(allBooks) == 0 {
 		t.Skip("No books in database to test with")
 		return
 	}
 
 	testTitle := allBooks[0].Title
-	books := repo.GetBookByTitle(testTitle)
+	books, err := repo.GetBookByTitle(testTitle)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
@@ -117,7 +125,10 @@ func TestGetBookByTitle(t *testing.T) {
 	}
 
 	nonExistentTitle := "Non-Existent Book Title 12345"
-	emptyBooks := repo.GetBookByTitle(nonExistentTitle)
+	emptyBooks, err := repo.GetBookByTitle(nonExistentTitle)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if emptyBooks == nil {
 		t.Error("should return empty slice, not nil")
@@ -132,14 +143,20 @@ func TestGetBookByPubyear(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	allBooks := repo.GetAllBooks()
+	allBooks, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(allBooks) == 0 {
 		t.Skip("No books in database to test with")
 		return
 	}
 
 	testPubYear := allBooks[0].PubYear
-	books := repo.GetBookByPubyear(testPubYear)
+	books, err := repo.GetBookByPubyear(testPubYear)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
@@ -153,7 +170,10 @@ func TestGetBookByPubyear(t *testing.T) {
 	}
 
 	nonExistentYear := 9999
-	emptyBooks := repo.GetBookByPubyear(nonExistentYear)
+	emptyBooks, err := repo.GetBookByPubyear(nonExistentYear)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if emptyBooks == nil {
 		t.Error("should return empty slice, not nil")
@@ -169,14 +189,20 @@ func TestGetBookByCategory(t *testing.T) {
 	defer cleanup()
 
 	// Test with a valid category
-	allBooks := repo.GetAllBooks()
+	allBooks, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(allBooks) == 0 {
 		t.Skip("No books in database to test with")
 		return
 	}
 
 	testCategory := allBooks[0].Category
-	books := repo.GetBookByCategory(testCategory)
+	books, err := repo.GetBookByCategory(testCategory)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
@@ -190,7 +216,10 @@ func TestGetBookByCategory(t *testing.T) {
 	}
 
 	nonExistentCategory := "NonExistentCategory123"
-	emptyBooks := repo.GetBookByCategory(nonExistentCategory)
+	emptyBooks, err := repo.GetBookByCategory(nonExistentCategory)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if emptyBooks == nil {
 		t.Error("should return empty slice, not nil")
@@ -205,7 +234,10 @@ func TestGetBookByAuthor(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	allBooks := repo.GetAllBooks()
+	allBooks, err := repo.GetAllBooks()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(allBooks) == 0 {
 		t.Skip("No books in database to test with")
 		return
@@ -213,7 +245,10 @@ func TestGetBookByAuthor(t *testing.T) {
 
 	// Test with a valid author name from seed data
 	testAuthor := "Robert C. Martin"
-	books := repo.GetBookByAuthor(testAuthor)
+	books, err := repo.GetBookByAuthor(testAuthor)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
@@ -229,7 +264,10 @@ func TestGetBookByAuthor(t *testing.T) {
 
 	// Test with a non-existent author
 	nonExistentAuthor := "Non-Existent Author Name 12345"
-	emptyBooks := repo.GetBookByAuthor(nonExistentAuthor)
+	emptyBooks, err := repo.GetBookByAuthor(nonExistentAuthor)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if emptyBooks == nil {
 		t.Error("should return empty slice, not nil")
@@ -244,7 +282,10 @@ func TestGetBooksToRestock(t *testing.T) {
 	repo, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	books := repo.GetBooksToRestock()
+	books, err := repo.GetBooksToRestock()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if books == nil {
 		t.Error("books should not be nil")
