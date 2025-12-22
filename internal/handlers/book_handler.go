@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"bookstore-project/internal/repository"
+	"log"
+	"net/url"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -48,6 +51,101 @@ func (h *BookHandler) GetBookByAuthor(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to fetch book",
+		})
+	}
+
+	if len(books) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "no books found",
+		})
+	}
+
+	return c.JSON(books)
+
+}
+
+func (h *BookHandler) GetBookByPubyear(c *fiber.Ctx) error {
+	pubyear, err := strconv.Atoi(c.Params("year"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid publication year",
+		})
+	}
+
+	books, err := h.repo.GetBookByPubyear(pubyear)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch book",
+		})
+	}
+
+	if len(books) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "no books found",
+		})
+	}
+
+	return c.JSON(books)
+
+}
+
+func (h *BookHandler) GetBookByTitle(c *fiber.Ctx) error {
+	title := c.Params("title")
+
+	//  DECODE title TO RESOLVE SPACES AND SPECIAL CHARACTERS
+	decodedTitle, err := url.QueryUnescape(title)
+	if err != nil {
+		log.Printf("DEBUG: Failed to decode title: %v", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid title encoding",
+		})
+	}
+
+	if decodedTitle == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid title",
+		})
+	}
+
+	books, err := h.repo.GetBookByTitle(decodedTitle)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch book",
+		})
+	}
+
+	if len(books) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "no books found",
+		})
+	}
+
+	return c.JSON(books)
+
+}
+
+func (h *BookHandler) GetBookByCategory(c *fiber.Ctx) error {
+	category := c.Params("category")
+
+	
+	decodedCategory, err := url.QueryUnescape(category)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid category encoding",
+		})
+	}
+
+	if decodedCategory == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid category",
+		})
+	}
+
+	books, err := h.repo.GetBookByCategory(decodedCategory)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch books",
 		})
 	}
 

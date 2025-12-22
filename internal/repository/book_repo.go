@@ -40,7 +40,7 @@ func (r *BookRepo) GetBookByIsbn(isbn string) (*models.Book, error) {
 func (B *BookRepo) GetBookByTitle(title string) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, "SELECT * FROM book WHERE title = $1", title)
+	err := B.db.Select(&books, "SELECT * FROM book WHERE LOWER(title) = LOWER($1)", title)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (B *BookRepo) GetBookByPubyear(pubYear int) ([]models.Book, error) {
 func (B *BookRepo) GetBookByCategory(category string) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, "SELECT * FROM book WHERE category = $1", category)
+	err := B.db.Select(&books, "SELECT * FROM book WHERE LOWER(category) = LOWER($1)", category)
 	if err != nil {
 		return nil, err
 	}

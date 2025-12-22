@@ -33,9 +33,15 @@ func main() {
 	handler := handlers.NewBookHandler(Repo)
 
 	app.Get("/books", handler.GetAllBooks)
-	app.Get("/books/:isbn",handler.GetBookByIsbn)
-	app.Get("/books/author/:name",handler.GetBookByAuthor)
+	app.Get("/books/author/:name", handler.GetBookByAuthor)
+	app.Get("/books/pubyear/:year", handler.GetBookByPubyear)
+	app.Get("/books/title/:title", handler.GetBookByTitle)
+	app.Get("/books/category/:category", handler.GetBookByCategory)
+	app.Get("/books/:isbn", handler.GetBookByIsbn)
 
-	app.Listen(":3001")
+	err = app.Listen(":3001")
+	if err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 
 }
