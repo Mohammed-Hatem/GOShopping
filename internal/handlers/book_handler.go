@@ -46,7 +46,16 @@ func (h *BookHandler) GetBookByIsbn(c *fiber.Ctx) error {
 }
 
 func (h *BookHandler) GetBookByAuthor(c *fiber.Ctx) error {
-	books, err := h.repo.GetBookByAuthor(c.Params("name"))
+
+	author := c.Params("name")
+	decodedAuthor, err := url.QueryUnescape(author)
+	if err != nil {
+		log.Printf("DEBUG: Failed to decode author: %v", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid author encoding",
+		})
+	}
+	books, err := h.repo.GetBookByAuthor(decodedAuthor)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -128,7 +137,6 @@ func (h *BookHandler) GetBookByTitle(c *fiber.Ctx) error {
 func (h *BookHandler) GetBookByCategory(c *fiber.Ctx) error {
 	category := c.Params("category")
 
-	
 	decodedCategory, err := url.QueryUnescape(category)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
