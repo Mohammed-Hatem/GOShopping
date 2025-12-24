@@ -27,6 +27,10 @@ func main() {
 
 	log.Println("Connected to database successfully")
 
+	if err := database.RunMigrations(db); err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
+	}
+
 	app := fiber.New()
 
 	Repo := repository.NewBookRepo(db)

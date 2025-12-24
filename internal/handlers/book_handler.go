@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bookstore-project/internal/repository"
-	"log"
 	"net/url"
 	"strconv"
 
@@ -50,7 +49,6 @@ func (h *BookHandler) GetBookByAuthor(c *fiber.Ctx) error {
 	author := c.Params("name")
 	decodedAuthor, err := url.QueryUnescape(author)
 	if err != nil {
-		log.Printf("DEBUG: Failed to decode author: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "invalid author encoding",
 		})
@@ -105,7 +103,6 @@ func (h *BookHandler) GetBookByTitle(c *fiber.Ctx) error {
 	//  DECODE title TO RESOLVE SPACES AND SPECIAL CHARACTERS
 	decodedTitle, err := url.QueryUnescape(title)
 	if err != nil {
-		log.Printf("DEBUG: Failed to decode title: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "invalid title encoding",
 		})

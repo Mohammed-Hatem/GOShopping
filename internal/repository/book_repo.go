@@ -73,13 +73,7 @@ func (B *BookRepo) GetBookByCategory(category string) ([]models.Book, error) {
 func (B *BookRepo) GetBookByAuthor(author string) ([]models.Book, error) {
 	books := []models.Book{}
 
-	err := B.db.Select(&books, `
-		 SELECT DISTINCT b.*
-        FROM book b
-        JOIN book_author ba ON ba.isbn = b.isbn
-        JOIN author a ON a.author_id = ba.author_id
-        WHERE LOWER(a.name) = LOWER($1);
-    `, author)
+	err := B.db.Select(&books, "SELECT * FROM book WHERE LOWER(author_name) = LOWER($1)", author)
 
 	if err != nil {
 		return nil, err

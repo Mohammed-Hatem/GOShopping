@@ -1,5 +1,17 @@
 -- Initial schema for bookstore
 
+-- avoid conflicts
+DROP TABLE IF EXISTS publisher_order CASCADE;
+DROP TABLE IF EXISTS order_item CASCADE;
+DROP TABLE IF EXISTS sales_order CASCADE;
+DROP TABLE IF EXISTS cart_item CASCADE;
+DROP TABLE IF EXISTS shopping_cart CASCADE;
+DROP TABLE IF EXISTS administrator CASCADE;
+DROP TABLE IF EXISTS customer CASCADE;
+DROP TABLE IF EXISTS book CASCADE;
+DROP TABLE IF EXISTS author CASCADE;
+DROP TABLE IF EXISTS publisher CASCADE;
+
 -- 1. Publisher Table
 CREATE TABLE IF NOT EXISTS publisher (
     publisher_id SERIAL PRIMARY KEY,
@@ -9,8 +21,7 @@ CREATE TABLE IF NOT EXISTS publisher (
 );
 -- 2. author Table
 CREATE TABLE IF NOT EXISTS author (
-    author_id SERIAL PRIMARY KEY,
-    name      VARCHAR(255) NOT NULL
+    name VARCHAR(255) PRIMARY KEY
 );
 
 -- 3. Book Table
@@ -20,27 +31,17 @@ CREATE TABLE IF NOT EXISTS book (
     publication_year INT,
     selling_price    DECIMAL(10, 2),
     category         VARCHAR(100),
+    author_name       VARCHAR(255) NOT NULL,
     stock_quantity   INT DEFAULT 0,
     threshold        INT DEFAULT 10,
     publisher_id     INT,
     CONSTRAINT fk_book_publisher
         FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
+    ,CONSTRAINT fk_book_author
+        FOREIGN KEY (author_name) REFERENCES author(name)
 );
 
--- 4. Book-Author Relationship Table
-CREATE TABLE IF NOT EXISTS book_author (
-    isbn      VARCHAR(20),
-
-    author_id INT,
-    PRIMARY KEY (isbn, author_id),
-
-    CONSTRAINT fk_book_author_book
-        FOREIGN KEY (isbn) REFERENCES book(isbn),
-    CONSTRAINT fk_book_author_author
-        FOREIGN KEY (author_id) REFERENCES author(author_id)
-);
-
--- 5. Customer Table
+-- 4. Customer Table
 CREATE TABLE IF NOT EXISTS customer (
     username         VARCHAR(50) PRIMARY KEY,
     password         VARCHAR(255) NOT NULL,
@@ -51,14 +52,14 @@ CREATE TABLE IF NOT EXISTS customer (
     shipping_address TEXT
 );
 
--- 6. Administrator Table
+-- 5. Administrator Table
 CREATE TABLE IF NOT EXISTS administrator (
     admin_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL
 );
 
--- 7. Shopping Cart Table
+-- 6. Shopping Cart Table
 CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id  SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE,
@@ -66,7 +67,7 @@ CREATE TABLE IF NOT EXISTS shopping_cart (
         FOREIGN KEY (username) REFERENCES customer(username)
 );
 
--- 8. Cart Item Table
+-- 7. Cart Item Table
 CREATE TABLE IF NOT EXISTS cart_item (
     cart_id INT,
     isbn    VARCHAR(20),
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS cart_item (
         FOREIGN KEY (isbn) REFERENCES book(isbn)
 );
 
--- 9. Sales Order Table
+-- 8. Sales Order Table
 CREATE TABLE IF NOT EXISTS sales_order (
     order_id      SERIAL PRIMARY KEY,
     order_date    DATE NOT NULL,
@@ -90,7 +91,7 @@ CREATE TABLE IF NOT EXISTS sales_order (
         FOREIGN KEY (username) REFERENCES customer(username)
 );
 
--- 10. Order Item Table
+-- 9. Order Item Table
 CREATE TABLE IF NOT EXISTS order_item (
     order_id  INT,
     isbn      VARCHAR(20),
@@ -103,7 +104,7 @@ CREATE TABLE IF NOT EXISTS order_item (
         FOREIGN KEY (isbn) REFERENCES book(isbn)
 );
 
--- 11. Publisher Order Table
+-- 10. Publisher Order Table
 -- This table tracks orders made by the publisher for books
 CREATE TABLE IF NOT EXISTS publisher_order (
     rep_order_id SERIAL PRIMARY KEY,
