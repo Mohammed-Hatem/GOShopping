@@ -10,9 +10,8 @@ type SalesOrder struct {
 }
 
 type OrderItem struct {
-	OrderID int     `db:"order_id" json:"order_id"`
-	ISBN    string  `db:"isbn" json:"isbn"`
-	Quantity int    `db:"quantity" json:"quantity"`
-	Price   float64 `db:"unit_price" json:"unit_price"`
+	OrderID  int     `db:"order_id" json:"order_id"`
+	ISBN     string  `db:"isbn" json:"isbn"`
+	Quantity int     `db:"quantity" json:"quantity"`
+	Price    float64 `db:"unit_price" json:"unit_price"`
 }
-
