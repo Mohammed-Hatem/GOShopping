@@ -6,6 +6,7 @@ import (
 	"bookstore-project/internal/config"
 	"bookstore-project/internal/database"
 	"bookstore-project/internal/handlers"
+	"bookstore-project/internal/middleware"
 	"bookstore-project/internal/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,6 +49,8 @@ func main() {
 	app.Get("/books/:isbn", handler.GetBookByIsbn)
 
 	app.Post("/signup", customerHandler.Signup)
+	app.Post("/login", customerHandler.Login)
+	app.Get("/profile", middleware.Protect(), customerHandler.GetProfile)
 
 	err = app.Listen(":3001")
 	if err != nil {

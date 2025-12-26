@@ -27,6 +27,11 @@ type signupRequest struct {
 	Address   string `json:"shipping_address"`
 }
 
+type loginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func (h *CustomerHandler) Signup(c *fiber.Ctx) error {
 	var req signupRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -71,3 +76,60 @@ func (h *CustomerHandler) Signup(c *fiber.Ctx) error {
 	})
 }
 
+func (h *CustomerHandler) Login(c *fiber.Ctx) error {
+	var req loginRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "faulty request body",
+		})
+	}
+	customer, err := h.repo.GetCustomerByUsername(req.Username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch customer",
+		})
+	}
+	if customer == nil || customer.Password != req.Password {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "invalid username or password",
+		})
+	}
+
+	token, err := middleware.GenerateAuthToken(req.Username, "customer")
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to generate token",
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"username": req.Username,
+		"token":    token,
+	})
+
+}
+
+func (h *CustomerHandler) GetProfile(c *fiber.Ctx) error {
+	usernameAny := c.Locals("username")
+	username, ok := usernameAny.(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	customer, err := h.repo.GetCustomerByUsername(username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch customer",
+		})
+	}
+	if customer == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "customer not found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(customer)
+}
