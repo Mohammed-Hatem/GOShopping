@@ -26,7 +26,6 @@ func main() {
 	}
 	defer db.Close()
 
-
 	log.Println("Connected to database successfully")
 
 	if err := database.RunMigrations(db); err != nil {
@@ -35,39 +34,51 @@ func main() {
 
 	app := fiber.New()
 
-	Repo := repository.NewBookRepo(db)
-	handler := handlers.NewBookHandler(Repo)
+	// Initialize repositories
+	bookRepo := repository.NewBookRepo(db)
+	bookHandler := handlers.NewBookHandler(bookRepo)
 
 	customerRepo := repository.NewCustomerRepo(db)
 	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
-	cartRepo := repository.NewCartRepo(db)
+	adminRepo := repository.NewAdminRepo(db)
+	authHandler := handlers.NewAuthHandler(customerRepo, adminRepo)
+
 	orderRepo := repository.NewOrderRepo(db)
-	cartHandler := handlers.NewCartHandler(cartRepo, orderRepo)
+	orderHandler := handlers.NewOrderHandler(orderRepo)
 
-	app.Get("/books", handler.GetAllBooks)
-	app.Get("/books/author/:name", handler.GetBookByAuthor)
-	app.Get("/books/pubyear/:year", handler.GetBookByPubyear)
-	app.Get("/books/title/:title", handler.GetBookByTitle)
-	app.Get("/books/category/:category", handler.GetBookByCategory)
-	app.Get("/books/:isbn", handler.GetBookByIsbn)
+	// Public book search endpoints (available to all users)
+	app.Get("/api/books", bookHandler.GetAllBooks)
+	app.Get("/api/books/author/:name", bookHandler.GetBookByAuthor)
+	app.Get("/api/books/pubyear/:year", bookHandler.GetBookByPubyear)
+	app.Get("/api/books/title/:title", bookHandler.GetBookByTitle)
+	app.Get("/api/books/category/:category", bookHandler.GetBookByCategory)
+	app.Get("/api/books/publisher/:publisher_id", bookHandler.GetBookByPublisher)
+	app.Get("/api/books/:isbn", bookHandler.GetBookByIsbn)
 
-	app.Post("/signup", customerHandler.Signup)
-	app.Post("/login", customerHandler.Login)
-	app.Get("/profile", middleware.Protect(), customerHandler.GetProfile)
-	app.Patch("/profile", middleware.Protect(), customerHandler.UpdateProfile)
+	// Authentication endpoints
+	app.Post("/api/auth/signup", customerHandler.Signup)
+	app.Post("/api/auth/login", authHandler.Login)
 
-	// Cart + checkout (Customer)
-	app.Post("/cart/items", middleware.Protect(), cartHandler.AddToCart)
-	app.Get("/cart", middleware.Protect(), cartHandler.ViewCart)
-	app.Delete("/cart/items/:isbn", middleware.Protect(), cartHandler.RemoveItem)
-	app.Post("/cart/checkout", middleware.Protect(), cartHandler.Checkout)
+	// Customer endpoints
+	app.Get("/api/customer/profile", middleware.Protect(), customerHandler.GetProfile)
+	app.Patch("/api/customer/profile", middleware.Protect(), customerHandler.UpdateProfile)
+
+	// Admin-only book management endpoints
+	app.Post("/api/admin/books", middleware.AdminOnly(), bookHandler.AddBook)
+	app.Put("/api/admin/books/:isbn", middleware.AdminOnly(), bookHandler.UpdateBook)
+	app.Patch("/api/admin/books/:isbn/stock", middleware.AdminOnly(), bookHandler.UpdateBookStock)
+
+	// Admin-only publisher order endpoints
+	app.Get("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.GetAllPublisherOrders)
+	app.Get("/api/admin/publisher-orders/pending", middleware.AdminOnly(), orderHandler.GetPendingPublisherOrders)
+	app.Get("/api/admin/publisher-orders/:id", middleware.AdminOnly(), orderHandler.GetPublisherOrder)
+	app.Post("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.PlacePublisherOrder)
+	app.Put("/api/admin/publisher-orders/:id/confirm", middleware.AdminOnly(), orderHandler.ConfirmPublisherOrder)
 
 	err = app.Listen(":3001")
 	if err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
-
-
 
 }
