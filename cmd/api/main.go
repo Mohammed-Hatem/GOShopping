@@ -51,6 +51,7 @@ func main() {
 	app.Post("/signup", customerHandler.Signup)
 	app.Post("/login", customerHandler.Login)
 	app.Get("/profile", middleware.Protect(), customerHandler.GetProfile)
+	app.Patch("/profile", middleware.Protect(), customerHandler.UpdateProfile)
 
 	err = app.Listen(":3001")
 	if err != nil {
