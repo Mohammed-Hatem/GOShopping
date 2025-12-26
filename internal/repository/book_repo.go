@@ -93,3 +93,44 @@ func (B *BookRepo) GetBooksToRestock() ([]models.Book, error) {
 
 	return books, nil
 }
+
+// AddBook adds a new book to the database
+func (r *BookRepo) AddBook(book models.Book) error {
+	query := `
+		INSERT INTO book (isbn, title, publication_year, selling_price, category, author_name, stock_quantity, threshold, publisher_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
+	_, err := r.db.Exec(query, book.Isbn, book.Title, book.PubYear, book.SellingPrice,
+		book.Category, book.AuthorName, book.StockQuantity, book.Threshold, book.PublisherId)
+	return err
+}
+
+// UpdateBook updates an existing book
+func (r *BookRepo) UpdateBook(book models.Book) error {
+	query := `
+		UPDATE book 
+		SET title = $2, publication_year = $3, selling_price = $4, category = $5, 
+			author_name = $6, threshold = $7, publisher_id = $8
+		WHERE isbn = $1`
+
+	_, err := r.db.Exec(query, book.Isbn, book.Title, book.PubYear, book.SellingPrice,
+		book.Category, book.AuthorName, book.Threshold, book.PublisherId)
+	return err
+}
+
+// UpdateBookStock updates the stock quantity of a book
+func (r *BookRepo) UpdateBookStock(isbn string, quantity int) error {
+	query := `UPDATE book SET stock_quantity = $2 WHERE isbn = $1`
+	_, err := r.db.Exec(query, isbn, quantity)
+	return err
+}
+
+// GetBookByPublisher retrieves books by publisher ID
+func (r *BookRepo) GetBookByPublisher(publisherId int) ([]models.Book, error) {
+	var books []models.Book
+	err := r.db.Select(&books, "SELECT * FROM book WHERE publisher_id = $1", publisherId)
+	if err != nil {
+		return nil, err
+	}
+	return books, nil
+}
