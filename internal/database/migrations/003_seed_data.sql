@@ -7,11 +7,11 @@ INSERT INTO PUBLISHER (Publisher_ID, Name, Address, Phone) VALUES
     (3, 'HarperCollins', '195 Broadway, New York, NY', '+1-212-207-7000');
 
 -- 2. Authors
-INSERT INTO AUTHOR (Name) VALUES
-    ('Robert C. Martin'),
-    ('Martin Fowler'),
-    ('J.K. Rowling'),
-    ('George R.R. Martin');
+INSERT INTO AUTHOR (Name, ISBN) VALUES
+    ('Robert C. Martin', '9780132350884'),
+    ('Martin Fowler', '9780201485677'),
+    ('J.K. Rowling', '9780747532743'),
+    ('George R.R. Martin', '9780553103540');
 
 -- 3. Books
 INSERT INTO BOOK (ISBN, Title, Publication_Year, Selling_Price, Category, Author_Name, Stock_Quantity, Threshold, Publisher_ID) VALUES

@@ -12,7 +12,6 @@ DROP TABLE IF EXISTS book CASCADE;
 DROP TABLE IF EXISTS author CASCADE;
 DROP TABLE IF EXISTS publisher CASCADE;
 
--- 1. Publisher Table
 CREATE TABLE IF NOT EXISTS publisher (
     publisher_id SERIAL PRIMARY KEY,
     name         VARCHAR(255) NOT NULL,
@@ -21,7 +20,9 @@ CREATE TABLE IF NOT EXISTS publisher (
 );
 -- 2. author Table
 CREATE TABLE IF NOT EXISTS author (
-    name VARCHAR(255) PRIMARY KEY
+    name VARCHAR(255),
+    isbn VARCHAR(20),
+    PRIMARY KEY (name, isbn)
 );
 
 -- 3. Book Table
@@ -37,8 +38,6 @@ CREATE TABLE IF NOT EXISTS book (
     publisher_id     INT,
     CONSTRAINT fk_book_publisher
         FOREIGN KEY (publisher_id) REFERENCES publisher(publisher_id)
-    ,CONSTRAINT fk_book_author
-        FOREIGN KEY (author_name) REFERENCES author(name)
 );
 
 -- 4. Customer Table
