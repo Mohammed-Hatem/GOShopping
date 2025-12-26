@@ -79,11 +79,13 @@ func main() {
 	app.Patch("/api/admin/books/:isbn/stock", middleware.AdminOnly(), bookHandler.UpdateBookStock)
 
 	// Admin-only publisher order endpoints
-	app.Get("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.GetAllPublisherOrders)
+	// Note: More specific routes must be registered before less specific ones
 	app.Get("/api/admin/publisher-orders/pending", middleware.AdminOnly(), orderHandler.GetPendingPublisherOrders)
-	app.Get("/api/admin/publisher-orders/:id", middleware.AdminOnly(), orderHandler.GetPublisherOrder)
-	app.Post("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.PlacePublisherOrder)
+	app.Patch("/api/admin/publisher-orders/:id/status", middleware.AdminOnly(), orderHandler.UpdatePublisherOrderStatus)
 	app.Put("/api/admin/publisher-orders/:id/confirm", middleware.AdminOnly(), orderHandler.ConfirmPublisherOrder)
+	app.Get("/api/admin/publisher-orders/:id", middleware.AdminOnly(), orderHandler.GetPublisherOrder)
+	app.Get("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.GetAllPublisherOrders)
+	app.Post("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.PlacePublisherOrder)
 
 	err = app.Listen(":3001")
 	if err != nil {
