@@ -56,6 +56,15 @@ func main() {
 	orderRepo := repository.NewOrderRepo(db)
 	orderHandler := handlers.NewOrderHandler(orderRepo)
 
+	cartRepo := repository.NewCartRepo(db)
+	cartHandler := handlers.NewCartHandler(cartRepo)
+
+	salesRepo := repository.NewSalesRepo(db)
+	checkoutHandler := handlers.NewCheckoutHandler(cartRepo, salesRepo, bookRepo)
+
+	reportRepo := repository.NewReportRepo(db)
+	reportHandler := handlers.NewReportHandler(reportRepo)
+
 	// Public book search endpoints (available to all users)
 	app.Get("/api/books", bookHandler.GetAllBooks)
 	app.Get("/api/books/author/:name", bookHandler.GetBookByAuthor)
@@ -72,6 +81,18 @@ func main() {
 	// Customer endpoints
 	app.Get("/api/customer/profile", middleware.Protect(), customerHandler.GetProfile)
 	app.Patch("/api/customer/profile", middleware.Protect(), customerHandler.UpdateProfile)
+	app.Get("/api/customer/orders", middleware.Protect(), customerHandler.GetCustomerOrders)
+	app.Get("/api/customer/orders/:id", middleware.Protect(), customerHandler.GetOrderDetails)
+
+	// Cart endpoints
+	app.Get("/api/customer/cart", middleware.Protect(), cartHandler.GetCart)
+	app.Post("/api/customer/cart/items", middleware.Protect(), cartHandler.AddToCart)
+	app.Put("/api/customer/cart/items/:isbn", middleware.Protect(), cartHandler.UpdateCartItem)
+	app.Delete("/api/customer/cart/items/:isbn", middleware.Protect(), cartHandler.RemoveFromCart)
+	app.Delete("/api/customer/cart", middleware.Protect(), cartHandler.ClearCart)
+
+	// Checkout endpoint
+	app.Post("/api/customer/checkout", middleware.Protect(), checkoutHandler.Checkout)
 
 	// Admin-only book management endpoints
 	app.Post("/api/admin/books", middleware.AdminOnly(), bookHandler.AddBook)
@@ -86,6 +107,13 @@ func main() {
 	app.Get("/api/admin/publisher-orders/:id", middleware.AdminOnly(), orderHandler.GetPublisherOrder)
 	app.Get("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.GetAllPublisherOrders)
 	app.Post("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.PlacePublisherOrder)
+
+	// Admin report endpoints
+	app.Get("/api/admin/reports/monthly-sales", middleware.AdminOnly(), reportHandler.GetMonthlySales)
+	app.Get("/api/admin/reports/daily-sales", middleware.AdminOnly(), reportHandler.GetDailySales)
+	app.Get("/api/admin/reports/top-customers", middleware.AdminOnly(), reportHandler.GetTopCustomers)
+	app.Get("/api/admin/reports/top-selling-books", middleware.AdminOnly(), reportHandler.GetTopSellingBooks)
+	app.Get("/api/admin/reports/book-orders/:isbn", middleware.AdminOnly(), reportHandler.GetBookOrderCount)
 
 	err = app.Listen(":3001")
 	if err != nil {

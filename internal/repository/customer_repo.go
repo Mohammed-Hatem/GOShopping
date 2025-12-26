@@ -70,9 +70,10 @@ func (r *CustomerRepo) UpdateCustomerProfile(
 	email *string,
 	phone *string,
 	address *string,
+	password *string,
 ) error {
-	setClauses := make([]string, 0, 5)
-	args := make([]any, 0, 6)
+	setClauses := make([]string, 0, 6)
+	args := make([]any, 0, 7)
 	args = append(args, username)
 	argPos := 2
 
@@ -90,6 +91,7 @@ func (r *CustomerRepo) UpdateCustomerProfile(
 	addField("email", email)
 	addField("phone_number", phone)
 	addField("shipping_address", address)
+	addField("password", password)
 
 	if len(setClauses) == 0 {
 		return errors.New("no fields to update")
