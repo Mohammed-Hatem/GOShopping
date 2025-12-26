@@ -1,0 +1,689 @@
+{
+	"info": {
+		"_postman_id": "bookstore-api-collection",
+		"name": "Bookstore Order Processing System API",
+		"description": "Complete API collection for the Bookstore Order Processing System including admin and customer endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Customer Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('customerToken', response.token);",
+									"    pm.collectionVariables.set('customerUsername', response.username);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"alice\",\n    \"password\": \"hashed_password_1\",\n    \"role\": \"customer\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('adminToken', response.token);",
+									"    pm.collectionVariables.set('adminUsername', response.username);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin1\",\n    \"password\": \"admin_pass_1\",\n    \"role\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Customer Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newcustomer\",\n    \"password\": \"password123\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"shipping_address\": \"123 Main St, City, State 12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Public Book Search",
+			"item": [
+				{
+					"name": "Get All Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Book by ISBN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/9780132350884",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"9780132350884"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Books by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/category/Science",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"category",
+								"Science"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Books by Author",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/author/Robert%20C.%20Martin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"author",
+								"Robert C. Martin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Books by Title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/title/Clean%20Code",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"title",
+								"Clean Code"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Books by Publication Year",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/pubyear/2008",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"pubyear",
+								"2008"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Books by Publisher",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/books/publisher/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"books",
+								"publisher",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin Book Management",
+			"item": [
+				{
+					"name": "Add New Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isbn\": \"9780123456789\",\n    \"title\": \"Test Book for API\",\n    \"publication_year\": 2024,\n    \"selling_price\": 29.99,\n    \"category\": \"Science\",\n    \"author_name\": \"Test Author\",\n    \"stock_quantity\": 15,\n    \"threshold\": 5,\n    \"publisher_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/books",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Existing Book",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Test Book\",\n    \"selling_price\": 34.99,\n    \"category\": \"Art\",\n    \"publication_year\": 2024\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/books/9780123456789",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"books",
+								"9780123456789"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Book Stock (Triggers Auto-Order)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/books/9780553103540/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"books",
+								"9780553103540",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Publisher Order Management",
+			"item": [
+				{
+					"name": "Get All Publisher Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/publisher-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"publisher-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Publisher Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/publisher-orders/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"publisher-orders",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Publisher Order by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/publisher-orders/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"publisher-orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Place Publisher Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isbn\": \"9780132350884\",\n    \"quantity\": 25,\n    \"admin_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/publisher-orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"publisher-orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Publisher Order (Updates Stock)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/publisher-orders/1/confirm",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"publisher-orders",
+								"1",
+								"confirm"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customer Profile",
+			"item": [
+				{
+					"name": "Get Customer Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/customer/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Customer Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Alice Updated\",\n    \"email\": \"alice.updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Database Trigger Tests",
+			"item": [
+				{
+					"name": "Test Negative Stock Prevention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should prevent negative stock', function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.error).to.include('negative');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": -5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/books/9780132350884/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"books",
+								"9780132350884",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Auto-Order Trigger",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should create automatic order', function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 14\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/books/9780553103540/stock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"books",
+								"9780553103540",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3001/api",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
