@@ -10,6 +10,7 @@ import (
 	"bookstore-project/internal/repository"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -33,6 +34,14 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	// Enable CORS for frontend
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000",
+		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
+		AllowCredentials: true,
+	}))
 
 	// Initialize repositories
 	bookRepo := repository.NewBookRepo(db)

@@ -14,3 +14,9 @@ go.work
 
 .DS_Store
 Thumbs.db
+
+QUICK_START.md
+SETUP.md
+fix_permissions.sql
+recreate_database.sql
+

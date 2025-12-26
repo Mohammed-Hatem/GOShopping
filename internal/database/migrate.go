@@ -3,7 +3,7 @@ package database
 import (
 	"embed"
 	"fmt"
-	"path/filepath"
+	"path"
 	"sort"
 
 	"github.com/jmoiron/sqlx"
@@ -28,8 +28,8 @@ func RunMigrations(db *sqlx.DB) error {
 	sort.Strings(names)
 
 	for _, name := range names {
-		path := filepath.Join("migrations", name)
-		sqlBytes, err := migrationsFS.ReadFile(path)
+		filePath := path.Join("migrations", name)
+		sqlBytes, err := migrationsFS.ReadFile(filePath)
 		if err != nil {
 			return fmt.Errorf("read migration %s: %w", name, err)
 		}
