@@ -25,6 +25,7 @@ func main() {
 	}
 	defer db.Close()
 
+
 	log.Println("Connected to database successfully")
 
 	if err := database.RunMigrations(db); err != nil {
@@ -36,6 +37,9 @@ func main() {
 	Repo := repository.NewBookRepo(db)
 	handler := handlers.NewBookHandler(Repo)
 
+	customerRepo := repository.NewCustomerRepo(db)
+	customerHandler := handlers.NewCustomerHandler(customerRepo)
+
 	app.Get("/books", handler.GetAllBooks)
 	app.Get("/books/author/:name", handler.GetBookByAuthor)
 	app.Get("/books/pubyear/:year", handler.GetBookByPubyear)
@@ -43,9 +47,13 @@ func main() {
 	app.Get("/books/category/:category", handler.GetBookByCategory)
 	app.Get("/books/:isbn", handler.GetBookByIsbn)
 
+	app.Post("/signup", customerHandler.Signup)
+
 	err = app.Listen(":3001")
 	if err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
+
+
 
 }
