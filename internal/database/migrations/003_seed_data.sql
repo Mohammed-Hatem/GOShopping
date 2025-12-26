@@ -15,10 +15,16 @@ INSERT INTO AUTHOR (Name, ISBN) VALUES
 
 -- 3. Books
 INSERT INTO BOOK (ISBN, Title, Publication_Year, Selling_Price, Category, Author_Name, Stock_Quantity, Threshold, Publisher_ID) VALUES
-    ('9780132350884', 'Clean Code', 2008, 39.99, 'Programming', 'Robert C. Martin', 50, 10, 1),
-    ('9780201485677', 'Refactoring', 1999, 44.99, 'Programming', 'Martin Fowler', 40, 10, 2),
-    ('9780747532743', 'Harry Potter and the Philosopher''s Stone', 1997, 19.99, 'Fantasy', 'J.K. Rowling', 100, 20, 2),
-    ('9780553103540', 'A Game of Thrones', 1996, 24.99, 'Fantasy', 'George R.R. Martin', 80, 15, 3);
+    ('9780132350884', 'Clean Code', 2008, 39.99, 'Science', 'Robert C. Martin', 50, 10, 1),
+    ('9780201485677', 'Refactoring', 1999, 44.99, 'Science', 'Martin Fowler', 40, 10, 2),
+    ('9780747532743', 'Harry Potter and the Philosopher''s Stone', 1997, 19.99, 'Art', 'J.K. Rowling', 100, 20, 2),
+    ('9780553103540', 'A Game of Thrones', 1996, 24.99, 'History', 'George R.R. Martin', 8, 15, 3),
+    ('9780321765723', 'The Art of Computer Programming', 1968, 79.99, 'Science', 'Donald Knuth', 25, 5, 1),
+    ('9780134685991', 'Effective Java', 2018, 49.99, 'Science', 'Joshua Bloch', 30, 8, 1),
+    ('9780262033848', 'Introduction to Algorithms', 2009, 84.99, 'Science', 'Thomas Cormen', 15, 10, 2),
+    ('9780062315007', 'Sapiens: A Brief History', 2015, 18.99, 'History', 'Yuval Noah Harari', 60, 12, 3),
+    ('9780143126569', 'The Geography of Thought', 2003, 16.99, 'Geography', 'Richard Nisbett', 35, 7, 2),
+    ('9780061234006', 'The Power of Myth', 1988, 14.99, 'Religion', 'Joseph Campbell', 45, 9, 3);
 
 -- 4. Customers
 INSERT INTO CUSTOMER (Username, Password, First_Name, Last_Name, Email, Phone_Number, Shipping_Address) VALUES
@@ -55,4 +61,5 @@ INSERT INTO ORDER_ITEM (Order_ID, ISBN, Quantity, Unit_Price) VALUES
 -- 10. Publisher replenishment orders
 INSERT INTO PUBLISHER_ORDER (Rep_Order_ID, Order_Date, Status, Quantity, ISBN, Admin_ID) VALUES
     (1, CURRENT_DATE - INTERVAL '5 days', 'Pending', 100, '9780747532743', 1),
-    (2, CURRENT_DATE - INTERVAL '3 days', 'Completed', 50,  '9780132350884', 2);
+    (2, CURRENT_DATE - INTERVAL '3 days', 'Confirmed', 50,  '9780132350884', 2),
+    (3, CURRENT_DATE - INTERVAL '1 day', 'Pending', 20, '9780553103540', 1);
