@@ -1,11 +1,15 @@
 package repository
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
+
+	"bookstore-project/internal/models"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"bookstore-project/internal/models"
 )
 
 type CustomerRepo struct {
@@ -37,7 +41,9 @@ func (r *CustomerRepo) GetCustomerByUsername(username string) (*models.Customer,
 	var customer models.Customer
 
 	err := r.db.Get(&customer, "SELECT * FROM customer WHERE username = $1", username)
-
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -48,11 +54,60 @@ func (r *CustomerRepo) GetCustomerByEmail(email string) (*models.Customer, error
 
 	var customer models.Customer
 	err := r.db.Get(&customer, "SELECT * FROM customer WHERE email = $1", email)
-
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
 	return &customer, nil
+}
+
+func (r *CustomerRepo) UpdateCustomerProfile(
+	username string, //should exist
+	firstName *string,
+	lastName *string,
+	email *string,
+	phone *string,
+	address *string,
+) error {
+	setClauses := make([]string, 0, 5)
+	args := make([]any, 0, 6)
+	args = append(args, username)
+	argPos := 2
+
+	addField := func(column string, value *string) {
+		if value == nil {
+			return
+		}
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", column, argPos))
+		args = append(args, strings.TrimSpace(*value))
+		argPos++
+	}
+
+	addField("first_name", firstName)
+	addField("last_name", lastName)
+	addField("email", email)
+	addField("phone_number", phone)
+	addField("shipping_address", address)
+
+	if len(setClauses) == 0 {
+		return errors.New("no fields to update")
+	}
+
+	query := "UPDATE customer SET " + strings.Join(setClauses, ", ") + " WHERE username = $1"
+	_, err := r.db.Exec(query, args...)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			switch pqErr.Constraint {
+			case "customer_email_key":
+				return errors.New("email already exists")
+			}
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (r *CustomerRepo) GetOrdersByCustomer(username string) ([]models.SalesOrder, error) {

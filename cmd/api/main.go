@@ -41,6 +41,10 @@ func main() {
 	customerRepo := repository.NewCustomerRepo(db)
 	customerHandler := handlers.NewCustomerHandler(customerRepo)
 
+	cartRepo := repository.NewCartRepo(db)
+	orderRepo := repository.NewOrderRepo(db)
+	cartHandler := handlers.NewCartHandler(cartRepo, orderRepo)
+
 	app.Get("/books", handler.GetAllBooks)
 	app.Get("/books/author/:name", handler.GetBookByAuthor)
 	app.Get("/books/pubyear/:year", handler.GetBookByPubyear)
@@ -52,6 +56,12 @@ func main() {
 	app.Post("/login", customerHandler.Login)
 	app.Get("/profile", middleware.Protect(), customerHandler.GetProfile)
 	app.Patch("/profile", middleware.Protect(), customerHandler.UpdateProfile)
+
+	// Cart + checkout (Customer)
+	app.Post("/cart/items", middleware.Protect(), cartHandler.AddToCart)
+	app.Get("/cart", middleware.Protect(), cartHandler.ViewCart)
+	app.Delete("/cart/items/:isbn", middleware.Protect(), cartHandler.RemoveItem)
+	app.Post("/cart/checkout", middleware.Protect(), cartHandler.Checkout)
 
 	err = app.Listen(":3001")
 	if err != nil {

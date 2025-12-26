@@ -32,6 +32,14 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
+type updateProfileRequest struct {
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
+	Email     *string `json:"email"`
+	Phone     *string `json:"phone"`
+	Address   *string `json:"shipping_address"`
+}
+
 func (h *CustomerHandler) Signup(c *fiber.Ctx) error {
 	var req signupRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -117,6 +125,57 @@ func (h *CustomerHandler) GetProfile(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "unauthorized",
 		})
+	}
+
+	customer, err := h.repo.GetCustomerByUsername(username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch customer",
+		})
+	}
+	if customer == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "customer not found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(customer)
+}
+
+
+func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
+	usernameAny := c.Locals("username")//returns any type (intergace{})
+
+	username, ok := usernameAny.(string) //type assertion
+	if !ok || strings.TrimSpace(username) == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	var req updateProfileRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	err := h.repo.UpdateCustomerProfile(username, req.FirstName, req.LastName, req.Email, req.Phone, req.Address)
+	if err != nil {
+		switch err.Error() {
+		case "email already exists":
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		case "no fields to update":
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		default:
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "failed to update profile",
+			})
+		}
 	}
 
 	customer, err := h.repo.GetCustomerByUsername(username)
