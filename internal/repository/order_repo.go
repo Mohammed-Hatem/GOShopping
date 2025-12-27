@@ -3,6 +3,7 @@ package repository
 import (
 	"bookstore-project/internal/models"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -54,6 +55,23 @@ func (r *OrderRepo) PlacePublisherOrder(order models.PublisherOrder) error {
 func (r *OrderRepo) ConfirmPublisherOrder(id int) error {
 	query := `UPDATE publisher_order SET status = 'Confirmed' WHERE rep_order_id = $1`
 	_, err := r.db.Exec(query, id)
+	return err
+}
+
+// UpdatePublisherOrderStatus updates the status of a publisher order
+func (r *OrderRepo) UpdatePublisherOrderStatus(id int, status string) error {
+	// Validate status
+	validStatuses := map[string]bool{
+		"Pending":   true,
+		"Confirmed": true,
+		"Cancelled": true,
+	}
+	if !validStatuses[status] {
+		return errors.New("invalid status. Must be one of: Pending, Confirmed, Cancelled")
+	}
+
+	query := `UPDATE publisher_order SET status = $2 WHERE rep_order_id = $1`
+	_, err := r.db.Exec(query, id, status)
 	return err
 }
 

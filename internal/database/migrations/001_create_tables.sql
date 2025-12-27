@@ -1,16 +1,6 @@
 -- Initial schema for bookstore
-
--- avoid conflicts
-DROP TABLE IF EXISTS publisher_order CASCADE;
-DROP TABLE IF EXISTS order_item CASCADE;
-DROP TABLE IF EXISTS sales_order CASCADE;
-DROP TABLE IF EXISTS cart_item CASCADE;
-DROP TABLE IF EXISTS shopping_cart CASCADE;
-DROP TABLE IF EXISTS administrator CASCADE;
-DROP TABLE IF EXISTS customer CASCADE;
-DROP TABLE IF EXISTS book CASCADE;
-DROP TABLE IF EXISTS author CASCADE;
-DROP TABLE IF EXISTS publisher CASCADE;
+-- Note: DROP statements removed to prevent data loss on server restart
+-- If you need to reset the database, do it manually via psql
 
 CREATE TABLE IF NOT EXISTS publisher (
     publisher_id SERIAL PRIMARY KEY,

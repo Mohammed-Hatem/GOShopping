@@ -95,7 +95,7 @@ func (h *BookHandler) AddBook(c *fiber.Ctx) error {
 	err := h.repo.AddBook(book)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to add book",
+			"error": "failed to add book: " + err.Error(),
 		})
 	}
 
