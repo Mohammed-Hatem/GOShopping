@@ -11,9 +11,9 @@ import (
 )
 
 type CheckoutHandler struct {
-	cartRepo    *repository.CartRepo
-	salesRepo   *repository.SalesRepo
-	bookRepo    *repository.BookRepo
+	cartRepo  *repository.CartRepo
+	salesRepo *repository.SalesRepo
+	bookRepo  *repository.BookRepo
 }
 
 func NewCheckoutHandler(cartRepo *repository.CartRepo, salesRepo *repository.SalesRepo, bookRepo *repository.BookRepo) *CheckoutHandler {
@@ -33,18 +33,18 @@ type checkoutRequest struct {
 func validateCreditCard(cardNo string) error {
 	cardNo = strings.ReplaceAll(cardNo, " ", "")
 	cardNo = strings.ReplaceAll(cardNo, "-", "")
-	
+
 	if len(cardNo) < 13 || len(cardNo) > 19 {
 		return errors.New("invalid credit card number length")
 	}
-	
+
 	// Basic Luhn algorithm check would go here, but for simplicity we'll just check length and digits
 	for _, char := range cardNo {
 		if char < '0' || char > '9' {
 			return errors.New("credit card number must contain only digits")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -80,7 +80,7 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if expiry date is in the past (compare dates only, not time)
+	// Check if expiry date is in the past
 	today := time.Now()
 	todayStart := time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, today.Location())
 	expiryStart := time.Date(expiryDate.Year(), expiryDate.Month(), expiryDate.Day(), 0, 0, 0, 0, expiryDate.Location())
@@ -124,7 +124,6 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 		totalAmount += item.SellingPrice * float64(item.Quantity)
 	}
 
-	// Begin transaction would be ideal, but for simplicity we'll do sequential operations
 	// Create sales order
 	orderID, err := h.salesRepo.CreateSalesOrder(username, totalAmount, req.CreditCardNo, expiryDate)
 	if err != nil {
@@ -168,8 +167,7 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 	// Clear cart after successful checkout
 	err = h.cartRepo.ClearCart(cart.ID)
 	if err != nil {
-		// Log error but don't fail the checkout
-		// In production, you might want to handle this differently
+		// note to self: add retry if there is enough time
 	}
 
 	// Get the created order
@@ -191,4 +189,3 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 		"order_id": orderID,
 	})
 }
-

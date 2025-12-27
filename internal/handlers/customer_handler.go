@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"bookstore-project/internal/models"
 	"bookstore-project/internal/middleware"
+	"bookstore-project/internal/models"
 	"bookstore-project/internal/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,12 +35,12 @@ type loginRequest struct {
 }
 
 type updateProfileRequest struct {
-	FirstName      *string `json:"first_name"`
-	LastName       *string `json:"last_name"`
-	Email          *string `json:"email"`
-	Phone          *string `json:"phone"`
-	Address        *string `json:"shipping_address"`
-	Password       *string `json:"password"`
+	FirstName       *string `json:"first_name"`
+	LastName        *string `json:"last_name"`
+	Email           *string `json:"email"`
+	Phone           *string `json:"phone"`
+	Address         *string `json:"shipping_address"`
+	Password        *string `json:"password"`
 	CurrentPassword *string `json:"current_password"`
 }
 
@@ -146,9 +146,8 @@ func (h *CustomerHandler) GetProfile(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(customer)
 }
 
-
 func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
-	usernameAny := c.Locals("username")//returns any type (intergace{})
+	usernameAny := c.Locals("username") //returns any type (intergace{})
 
 	username, ok := usernameAny.(string) //type assertion
 	if !ok || strings.TrimSpace(username) == "" {
@@ -193,38 +192,38 @@ func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
 		}
 	}
 
-		err := h.repo.UpdateCustomerProfile(username, req.FirstName, req.LastName, req.Email, req.Phone, req.Address, req.Password)
-		if err != nil {
-			switch err.Error() {
-			case "email already exists":
-				return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-					"error": err.Error(),
-				})
-			case "no fields to update":
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error": err.Error(),
-				})
-			default:
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "failed to update profile",
-				})
-			}
-		}
-
-		customer, err := h.repo.GetCustomerByUsername(username)
-		if err != nil {
+	err := h.repo.UpdateCustomerProfile(username, req.FirstName, req.LastName, req.Email, req.Phone, req.Address, req.Password)
+	if err != nil {
+		switch err.Error() {
+		case "email already exists":
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		case "no fields to update":
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		default:
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "failed to fetch customer",
+				"error": "failed to update profile",
 			})
 		}
-		if customer == nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": "customer not found",
-			})
-		}
-
-		return c.Status(fiber.StatusOK).JSON(customer)
 	}
+
+	customer, err := h.repo.GetCustomerByUsername(username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch customer",
+		})
+	}
+	if customer == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "customer not found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(customer)
+}
 
 // GetCustomerOrders retrieves all orders for the authenticated customer
 func (h *CustomerHandler) GetCustomerOrders(c *fiber.Ctx) error {
