@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 
 	"bookstore-project/internal/config"
 	"bookstore-project/internal/database"
@@ -76,7 +78,16 @@ func main() {
 	app.Post("/api/admin/publisher-orders", middleware.AdminOnly(), orderHandler.PlacePublisherOrder)
 	app.Put("/api/admin/publisher-orders/:id/confirm", middleware.AdminOnly(), orderHandler.ConfirmPublisherOrder)
 
-	err = app.Listen(":3001")
+	port := strings.TrimSpace(os.Getenv("PORT"))
+	if port == "" {
+		port = "3001"
+	}
+	addr := port
+	if !strings.HasPrefix(addr, ":") {
+		addr = ":" + addr
+	}
+
+	err = app.Listen(addr)
 	if err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
