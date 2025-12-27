@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS author (
     name VARCHAR(255),
     isbn VARCHAR(20),
     PRIMARY KEY (name, isbn)
+    CONSTRAINT fk_author_book
+        FOREIGN KEY (isbn) REFERENCES book(isbn)
 );
 
 -- 3. Book Table
