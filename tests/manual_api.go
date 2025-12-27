@@ -29,7 +29,7 @@ type BookResponse struct {
 
 func main() {
 	// Test all endpoints sequentially
-	fmt.Println("🚀 Testing Bookstore API Endpoints")
+	fmt.Println("Testing Bookstore API Endpoints")
 	fmt.Println("==================================")
 
 	// Test public book search endpoints
@@ -38,71 +38,71 @@ func main() {
 	// Test admin login and admin endpoints
 	testAdminEndpoints()
 
-	fmt.Println("✅ All tests completed!")
+	fmt.Println("All tests completed!")
 }
 
 func testPublicEndpoints() {
-	fmt.Println("\n📚 Testing Public Book Search Endpoints")
+	fmt.Println("\nTesting Public Book Search Endpoints")
 	fmt.Println("-------------------------------------")
 
 	// Test 1: Get all books
 	fmt.Print("1. GET /api/books - ")
 	resp, err := http.Get(apiURL + "/books")
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Println("✅ Success")
+		fmt.Println("Success")
 		body, _ := io.ReadAll(resp.Body)
 		var books []models.Book
 		json.Unmarshal(body, &books)
 		fmt.Printf("   Found %d books\n", len(books))
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 	}
 
 	// Test 2: Get book by ISBN
 	fmt.Print("2. GET /api/books/9780132350884 - ")
 	resp, err = http.Get(apiURL + "/books/9780132350884")
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Println("✅ Success")
+		fmt.Println("Success")
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 	}
 
 	// Test 3: Get books by category
 	fmt.Print("3. GET /api/books/category/Science - ")
 	resp, err = http.Get(apiURL + "/books/category/Science")
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Println("✅ Success")
+		fmt.Println("Success")
 		body, _ := io.ReadAll(resp.Body)
 		var books []models.Book
 		json.Unmarshal(body, &books)
 		fmt.Printf("   Found %d Science books\n", len(books))
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 	}
 
 	// Test 4: Get books by author
 	fmt.Print("4. GET /api/books/author/Robert%20C.%20Martin - ")
 	resp, err = http.Get(apiURL + "/books/author/Robert%20C.%20Martin")
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -114,12 +114,12 @@ func testPublicEndpoints() {
 		json.Unmarshal(body, &books)
 		fmt.Printf("   Found %d books by Robert C. Martin\n", len(books))
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 	}
 }
 
 func testAdminEndpoints() {
-	fmt.Println("\n🔐 Testing Admin Endpoints")
+	fmt.Println("\nTesting Admin Endpoints")
 	fmt.Println("----------------------------")
 
 	// Test admin login
@@ -133,7 +133,7 @@ func testAdminEndpoints() {
 	body, _ := json.Marshal(loginData)
 	resp, err := http.Post(apiURL+"/auth/login", "application/json", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -143,18 +143,18 @@ func testAdminEndpoints() {
 	json.Unmarshal(body, &authResp)
 
 	if resp.StatusCode == 200 && authResp.Token != "" {
-		fmt.Println("✅ Success")
+		fmt.Println("Success")
 		fmt.Printf("   Got token for user: %s (role: %s)\n", authResp.Username, authResp.Role)
 
 		// Test admin endpoints with token
 		testProtectedEndpoints(authResp.Token)
 	} else {
-		fmt.Printf("❌ Failed: %s\n", authResp.Error)
+		fmt.Printf("Failed: %s\n", authResp.Error)
 	}
 }
 
 func testProtectedEndpoints(token string) {
-	fmt.Println("\n🔒 Testing Protected Admin Endpoints")
+	fmt.Println("\nTesting Protected Admin Endpoints")
 	fmt.Println("-----------------------------------")
 
 	// Test 1: Add new book
@@ -179,19 +179,19 @@ func testProtectedEndpoints(token string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 201 {
-		fmt.Println("✅ Success")
+		fmt.Println("Success")
 		body, _ := io.ReadAll(resp.Body)
 		var bookResp BookResponse
 		json.Unmarshal(body, &bookResp)
 		fmt.Printf("   Created book: %s\n", bookResp.Book.Title)
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Printf("   Error: %s\n", string(body))
 	}
@@ -203,7 +203,7 @@ func testProtectedEndpoints(token string) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -215,7 +215,7 @@ func testProtectedEndpoints(token string) {
 		json.Unmarshal(body, &orders)
 		fmt.Printf("   Found %d publisher orders\n", len(orders))
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Printf("   Error: %s\n", string(body))
 	}
@@ -230,15 +230,15 @@ func testProtectedEndpoints(token string) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Println("✅ Success (Stock updated, trigger should create automatic order)")
+		fmt.Println("Success (Stock updated, trigger should create automatic order)")
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Printf("   Error: %s\n", string(body))
 	}
@@ -250,15 +250,15 @@ func testProtectedEndpoints(token string) {
 
 	resp, err = client.Do(req)
 	if err != nil {
-		fmt.Printf("❌ Failed: %v\n", err)
+		fmt.Printf("Failed: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
-		fmt.Println("✅ Success (Order confirmed, stock should be updated)")
+		fmt.Println("Success (Order confirmed, stock should be updated)")
 	} else {
-		fmt.Printf("❌ Failed with status %d\n", resp.StatusCode)
+		fmt.Printf("Failed with status %d\n", resp.StatusCode)
 		body, _ := io.ReadAll(resp.Body)
 		fmt.Printf("   Error: %s\n", string(body))
 	}

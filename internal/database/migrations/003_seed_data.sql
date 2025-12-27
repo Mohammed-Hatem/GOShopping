@@ -59,7 +59,7 @@ INSERT INTO ORDER_ITEM (Order_ID, ISBN, Quantity, Unit_Price) VALUES
     (2, '9780553103540', 1, 24.99);
 
 -- 10. Publisher replenishment orders
-INSERT INTO PUBLISHER_ORDER (Rep_Order_ID, Order_Date, Status, Quantity, ISBN, Admin_ID) VALUES
-    (1, CURRENT_DATE - INTERVAL '5 days', 'Pending', 100, '9780747532743', 1),
-    (2, CURRENT_DATE - INTERVAL '3 days', 'Confirmed', 50,  '9780132350884', 2),
-    (3, CURRENT_DATE - INTERVAL '1 day', 'Pending', 20, '9780553103540', 1);
+INSERT INTO PUBLISHER_ORDER (Order_Date, Status, Quantity, ISBN, Admin_ID) VALUES
+    (CURRENT_DATE - INTERVAL '5 days', 'Pending', 100, '9780747532743', 1),
+    (CURRENT_DATE - INTERVAL '3 days', 'Confirmed', 50,  '9780132350884', 2),
+    (CURRENT_DATE - INTERVAL '1 day', 'Pending', 20, '9780553103540', 1);
