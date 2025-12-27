@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
-	"os"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"os"
 )
 
 func New() (*sqlx.DB, error) {
@@ -49,9 +49,5 @@ func New() (*sqlx.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-
-
 	return db, nil
 }
-
-

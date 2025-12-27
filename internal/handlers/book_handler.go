@@ -4,6 +4,7 @@ import (
 	"bookstore-project/internal/models"
 	"bookstore-project/internal/repository"
 	"net/url"
+	"slices"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -70,14 +71,8 @@ func (h *BookHandler) AddBook(c *fiber.Ctx) error {
 
 	// Validate category
 	validCategories := []string{"Science", "Art", "Religion", "History", "Geography"}
-	isValidCategory := false
-	for _, cat := range validCategories {
-		if book.Category == cat {
-			isValidCategory = true
-			break
-		}
-	}
-	if !isValidCategory {
+
+	if !slices.Contains(validCategories, book.Category) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "category must be one of: Science, Art, Religion, History, Geography",
 		})
@@ -100,7 +95,7 @@ func (h *BookHandler) AddBook(c *fiber.Ctx) error {
 	err := h.repo.AddBook(book)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to add book",
+			"error": "failed to add book: " + err.Error(),
 		})
 	}
 
@@ -132,14 +127,7 @@ func (h *BookHandler) UpdateBook(c *fiber.Ctx) error {
 	// Validate category if provided
 	if book.Category != "" {
 		validCategories := []string{"Science", "Art", "Religion", "History", "Geography"}
-		isValidCategory := false
-		for _, cat := range validCategories {
-			if book.Category == cat {
-				isValidCategory = true
-				break
-			}
-		}
-		if !isValidCategory {
+		if !slices.Contains(validCategories, book.Category) {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "category must be one of: Science, Art, Religion, History, Geography",
 			})

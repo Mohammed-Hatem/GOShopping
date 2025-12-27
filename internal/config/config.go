@@ -7,8 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
-func NewConfig() (error) {
+func NewConfig() error {
 	// Load environment variables from .env file
 	envPaths := []string{
 		".env",                      // Current directory
@@ -28,9 +27,6 @@ func NewConfig() (error) {
 	if !envLoaded {
 		return fmt.Errorf("Canoot load the .env file")
 	}
-
-
-
 
 	return nil
 }

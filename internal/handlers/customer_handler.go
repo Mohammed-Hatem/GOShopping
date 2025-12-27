@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"strconv"
 	"strings"
 
 	"bookstore-project/internal/middleware"
+	"bookstore-project/internal/models"
 	"bookstore-project/internal/repository"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,11 +35,13 @@ type loginRequest struct {
 }
 
 type updateProfileRequest struct {
-	FirstName *string `json:"first_name"`
-	LastName  *string `json:"last_name"`
-	Email     *string `json:"email"`
-	Phone     *string `json:"phone"`
-	Address   *string `json:"shipping_address"`
+	FirstName       *string `json:"first_name"`
+	LastName        *string `json:"last_name"`
+	Email           *string `json:"email"`
+	Phone           *string `json:"phone"`
+	Address         *string `json:"shipping_address"`
+	Password        *string `json:"password"`
+	CurrentPassword *string `json:"current_password"`
 }
 
 func (h *CustomerHandler) Signup(c *fiber.Ctx) error {
@@ -142,9 +146,8 @@ func (h *CustomerHandler) GetProfile(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(customer)
 }
 
-
 func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
-	usernameAny := c.Locals("username")//returns any type (intergace{})
+	usernameAny := c.Locals("username") //returns any type (intergace{})
 
 	username, ok := usernameAny.(string) //type assertion
 	if !ok || strings.TrimSpace(username) == "" {
@@ -160,7 +163,36 @@ func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
 		})
 	}
 
-	err := h.repo.UpdateCustomerProfile(username, req.FirstName, req.LastName, req.Email, req.Phone, req.Address)
+	// If password is being updated, verify current password first
+	if req.Password != nil {
+		if req.CurrentPassword == nil || *req.CurrentPassword == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "current_password is required when updating password",
+			})
+		}
+
+		// Get customer to verify current password
+		customer, err := h.repo.GetCustomerByUsername(username)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "failed to fetch customer",
+			})
+		}
+		if customer == nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "customer not found",
+			})
+		}
+
+		// Verify current password
+		if customer.Password != *req.CurrentPassword {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "current password is incorrect",
+			})
+		}
+	}
+
+	err := h.repo.UpdateCustomerProfile(username, req.FirstName, req.LastName, req.Email, req.Phone, req.Address, req.Password)
 	if err != nil {
 		switch err.Error() {
 		case "email already exists":
@@ -191,4 +223,78 @@ func (h *CustomerHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(customer)
+}
+
+// GetCustomerOrders retrieves all orders for the authenticated customer
+func (h *CustomerHandler) GetCustomerOrders(c *fiber.Ctx) error {
+	usernameAny := c.Locals("username")
+	username, ok := usernameAny.(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	orders, err := h.repo.GetOrdersByCustomer(username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch orders",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(orders)
+}
+
+// GetOrderDetails retrieves detailed information about a specific order
+func (h *CustomerHandler) GetOrderDetails(c *fiber.Ctx) error {
+	usernameAny := c.Locals("username")
+	username, ok := usernameAny.(string)
+	if !ok || strings.TrimSpace(username) == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "unauthorized",
+		})
+	}
+
+	orderIDParam := c.Params("id")
+	orderID, err := strconv.Atoi(orderIDParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid order ID",
+		})
+	}
+
+	// Get all orders for the user and find the specific one
+	orders, err := h.repo.GetOrdersByCustomer(username)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch orders",
+		})
+	}
+
+	var order *models.SalesOrder
+	for i := range orders {
+		if orders[i].OrderID == orderID {
+			order = &orders[i]
+			break
+		}
+	}
+
+	if order == nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "order not found",
+		})
+	}
+
+	// Get order items
+	items, err := h.repo.GetOrderItemsByOrderID(orderID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch order items",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"order": order,
+		"items": items,
+	})
 }

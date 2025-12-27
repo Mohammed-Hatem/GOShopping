@@ -115,3 +115,50 @@ func (h *OrderHandler) GetPendingPublisherOrders(c *fiber.Ctx) error {
 	}
 	return c.JSON(orders)
 }
+
+// Admin only: Update publisher order status
+func (h *OrderHandler) UpdatePublisherOrderStatus(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid order ID",
+		})
+	}
+
+	var request struct {
+		Status string `json:"status"`
+	}
+
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	if request.Status == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "status is required",
+		})
+	}
+
+	err = h.repo.UpdatePublisherOrderStatus(id, request.Status)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Fetch updated order to return
+	order, err := h.repo.GetPublisherOrder(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch updated order",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "order status updated successfully",
+		"order":   order,
+	})
+}

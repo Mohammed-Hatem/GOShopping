@@ -12,7 +12,7 @@ import (
 
 type claims struct {
 	Username string `json:"username"`
-	Role	 string `json:"role"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -24,7 +24,7 @@ func getJWTSecret() ([]byte, error) {
 	return []byte(secret), nil
 }
 
-func GenerateAuthToken(username,role string ) (	string, error) {
+func GenerateAuthToken(username, role string) (string, error) {
 	secret, err := getJWTSecret()
 	if err != nil {
 		return "", err
@@ -33,7 +33,7 @@ func GenerateAuthToken(username,role string ) (	string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &claims{
 		Username: username,
-		Role: role,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -42,8 +42,6 @@ func GenerateAuthToken(username,role string ) (	string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) //non hashed token
 
 	return token.SignedString(secret) //hashed token
-
-
 }
 
 func ValidateAuthToken(tokenString string) (*claims, error) {
@@ -131,11 +129,11 @@ func AdminOnly() fiber.Handler {
 			})
 		}
 
-		claims,err := ValidateAuthToken(tokenString)
+		claims, err := ValidateAuthToken(tokenString)
 
 		if err != nil || claims.Role != "admin" {
-			return c.Status (fiber.StatusUnauthorized).JSON (fiber.Map {
-				"error":"unauthorized access",
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "unauthorized access",
 			})
 		}
 
@@ -143,4 +141,3 @@ func AdminOnly() fiber.Handler {
 
 	}
 }
-

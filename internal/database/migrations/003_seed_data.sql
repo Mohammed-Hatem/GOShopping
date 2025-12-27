@@ -1,10 +1,10 @@
 -- Sample seed data for bookstore schema
 
 -- 1. Publishers
-INSERT INTO PUBLISHER (Publisher_ID, Name, Address, Phone) VALUES
-    (1, 'O''Reilly Media', '1005 Gravenstein Highway North, Sebastopol, CA', '+1-800-998-9938'),
-    (2, 'Penguin Random House', '1745 Broadway, New York, NY', '+1-212-782-9000'),
-    (3, 'HarperCollins', '195 Broadway, New York, NY', '+1-212-207-7000');
+INSERT INTO PUBLISHER (Name, Address, Phone) VALUES
+    ('O''Reilly Media', '1005 Gravenstein Highway North, Sebastopol, CA', '+1-800-998-9938'),
+    ('Penguin Random House', '1745 Broadway, New York, NY', '+1-212-782-9000'),
+    ('HarperCollins', '195 Broadway, New York, NY', '+1-212-207-7000');
 
 -- 2. Authors
 INSERT INTO AUTHOR (Name, ISBN) VALUES
@@ -32,14 +32,14 @@ INSERT INTO CUSTOMER (Username, Password, First_Name, Last_Name, Email, Phone_Nu
     ('bob',   'hashed_password_2', 'Bob',   'Smith',   'bob@example.com',   '+1-555-0002', '456 Oak Ave, Springfield');
 
 -- 5. Administrators
-INSERT INTO ADMINISTRATOR (Admin_ID, Username, Password) VALUES
-    (1, 'admin1', 'admin_pass_1'),
-    (2, 'admin2', 'admin_pass_2');
+INSERT INTO ADMINISTRATOR (Username, Password) VALUES
+    ('admin1', 'admin_pass_1'),
+    ('admin2', 'admin_pass_2');
 
 -- 6. Shopping carts
-INSERT INTO SHOPPING_CART (Cart_ID, Username) VALUES
-    (1, 'alice'),
-    (2, 'bob');
+INSERT INTO SHOPPING_CART (Username) VALUES
+    ('alice'),
+    ('bob');
 
 -- 7. Cart items
 INSERT INTO CART_ITEM (Cart_ID, ISBN, Quantity) VALUES
@@ -48,9 +48,9 @@ INSERT INTO CART_ITEM (Cart_ID, ISBN, Quantity) VALUES
     (2, '9780553103540', 1);
 
 -- 8. Sales orders
-INSERT INTO SALES_ORDER (Order_ID, Order_Date, Total_Amount, Credit_Card_No, Expiry_Date, Username) VALUES
-    (1, CURRENT_DATE - INTERVAL '2 days', 79.98, '4111111111111111', CURRENT_DATE + INTERVAL '1 year', 'alice'),
-    (2, CURRENT_DATE - INTERVAL '1 day', 24.99, '4000123412341234', CURRENT_DATE + INTERVAL '2 years', 'bob');
+INSERT INTO SALES_ORDER (Order_Date, Total_Amount, Credit_Card_No, Expiry_Date, Username) VALUES
+    (CURRENT_DATE - INTERVAL '2 days', 79.98, '4111111111111111', CURRENT_DATE + INTERVAL '1 year', 'alice'),
+    (CURRENT_DATE - INTERVAL '1 day', 24.99, '4000123412341234', CURRENT_DATE + INTERVAL '2 years', 'bob');
 
 -- 9. Order items
 INSERT INTO ORDER_ITEM (Order_ID, ISBN, Quantity, Unit_Price) VALUES
@@ -59,7 +59,7 @@ INSERT INTO ORDER_ITEM (Order_ID, ISBN, Quantity, Unit_Price) VALUES
     (2, '9780553103540', 1, 24.99);
 
 -- 10. Publisher replenishment orders
-INSERT INTO PUBLISHER_ORDER (Rep_Order_ID, Order_Date, Status, Quantity, ISBN, Admin_ID) VALUES
-    (1, CURRENT_DATE - INTERVAL '5 days', 'Pending', 100, '9780747532743', 1),
-    (2, CURRENT_DATE - INTERVAL '3 days', 'Confirmed', 50,  '9780132350884', 2),
-    (3, CURRENT_DATE - INTERVAL '1 day', 'Pending', 20, '9780553103540', 1);
+INSERT INTO PUBLISHER_ORDER (Order_Date, Status, Quantity, ISBN, Admin_ID) VALUES
+    (CURRENT_DATE - INTERVAL '5 days', 'Pending', 100, '9780747532743', 1),
+    (CURRENT_DATE - INTERVAL '3 days', 'Confirmed', 50,  '9780132350884', 2),
+    (CURRENT_DATE - INTERVAL '1 day', 'Pending', 20, '9780553103540', 1);
