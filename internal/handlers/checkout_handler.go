@@ -80,8 +80,11 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if expiry date is in the past
-	if expiryDate.Before(time.Now()) {
+	// Check if expiry date is in the past (compare dates only, not time)
+	today := time.Now()
+	todayStart := time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, today.Location())
+	expiryStart := time.Date(expiryDate.Year(), expiryDate.Month(), expiryDate.Day(), 0, 0, 0, 0, expiryDate.Location())
+	if expiryStart.Before(todayStart) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "credit card has expired",
 		})
@@ -126,7 +129,7 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 	orderID, err := h.salesRepo.CreateSalesOrder(username, totalAmount, req.CreditCardNo, expiryDate)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to create order",
+			"error": "failed to create order: " + err.Error(),
 		})
 	}
 
@@ -136,7 +139,7 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 		err = h.salesRepo.CreateOrderItem(orderID, item.ISBN, item.Quantity, item.SellingPrice)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "failed to create order item",
+				"error": "failed to create order item for " + item.ISBN + ": " + err.Error(),
 			})
 		}
 
@@ -176,10 +179,15 @@ func (h *CheckoutHandler) Checkout(c *fiber.Ctx) error {
 			"error": "failed to fetch order",
 		})
 	}
+	if order == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "order was created but could not be retrieved",
+		})
+	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "order created successfully",
-		"order":   order,
+		"message":  "order created successfully",
+		"order":    order,
 		"order_id": orderID,
 	})
 }

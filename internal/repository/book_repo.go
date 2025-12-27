@@ -96,13 +96,38 @@ func (B *BookRepo) GetBooksToRestock() ([]models.Book, error) {
 
 // AddBook adds a new book to the database
 func (r *BookRepo) AddBook(book models.Book) error {
+	// Start a transaction to ensure both book and author entries are created atomically
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Insert the book
 	query := `
 		INSERT INTO book (isbn, title, publication_year, selling_price, category, author_name, stock_quantity, threshold, publisher_id)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
-	_, err := r.db.Exec(query, book.Isbn, book.Title, book.PubYear, book.SellingPrice,
+	_, err = tx.Exec(query, book.Isbn, book.Title, book.PubYear, book.SellingPrice,
 		book.Category, book.AuthorName, book.StockQuantity, book.Threshold, book.PublisherId)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Insert into author table (many-to-many relationship)
+	// Use INSERT ... ON CONFLICT DO NOTHING to avoid errors if author-isbn pair already exists
+	authorQuery := `
+		INSERT INTO author (name, isbn)
+		VALUES ($1, $2)
+		ON CONFLICT (name, isbn) DO NOTHING`
+
+	_, err = tx.Exec(authorQuery, book.AuthorName, book.Isbn)
+	if err != nil {
+		return err
+	}
+
+	// Commit the transaction
+	return tx.Commit()
 }
 
 // UpdateBook updates an existing book

@@ -59,9 +59,10 @@ func (h *CartHandler) GetCart(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"cart_id": cart.ID,
-		"items":   items,
-		"total":   total,
+		"cart_id":      cart.ID,
+		"username":     cart.Username,
+		"items":        items,
+		"total_amount": total,
 	})
 }
 
